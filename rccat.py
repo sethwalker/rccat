@@ -1,5 +1,5 @@
 import zulip
-from zulip_bots import lib
+from zulip_bots.lib import ExternalBotHandler
 
 
 def dispatch(command, message, bot_handler):
@@ -29,7 +29,7 @@ def dispatch(command, message, bot_handler):
 
 if __name__ == "__main__":
     client = zulip.Client(config_file="zuliprc")
-    bot_handler = lib.ExternalBotHandler(client, None, None)
+    bot_handler = ExternalBotHandler(client, None, None)
 
     def handle_message(message):
         if message["content"].startswith("?"):
