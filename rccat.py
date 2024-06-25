@@ -13,7 +13,7 @@ def dispatch(command, message, client):
             return
 
         case "list":
-            bot_handler.send_reply(message, "help, list, convert, time")
+            bot_handler.send_reply(message, "help, list, convert, time, ritersay")
 
         case "time":
             import dateparser
@@ -31,6 +31,11 @@ def dispatch(command, message, client):
             client.add_reaction(
                 {"message_id": message["id"], "emoji_name": "highfive-pika"}
             )
+
+        case "ritersay":
+            from handlers import riter
+
+            riter.say(message["content"])
 
         # proof of concept forwarding to other (local) zulip bots
         # TBD?: forward via chat to other external bots
