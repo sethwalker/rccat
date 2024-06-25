@@ -39,6 +39,11 @@ def dispatch(command, message, client):
 
             riter.say(message["content"])
 
+        case "riterscroll":
+            from handlers import riter
+
+            riter.scroll(message["content"])
+
         # proof of concept forwarding to other (local) zulip bots
         # TBD?: forward via chat to other external bots
         case "convert":
