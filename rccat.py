@@ -2,7 +2,8 @@ import zulip
 from zulip_bots.lib import ExternalBotHandler
 
 
-def dispatch(command, message, bot_handler):
+def dispatch(command, message, client):
+    bot_handler = ExternalBotHandler(client, None, None)
     # strip the command from the message
     message["content"] = message["content"][len(command) + 1 :]
 
@@ -12,7 +13,19 @@ def dispatch(command, message, bot_handler):
             return
 
         case "list":
-            bot_handler.send_reply(message, "help, list, convert")
+            bot_handler.send_reply(message, "help, list, convert, time")
+
+        case "time":
+            import dateparser
+
+            u = client.get_user_by_id(message["sender_id"])
+            tz = u["user"]["timezone"]
+            print(tz)
+            t = dateparser.parse(
+                message["content"],
+                settings={"TIMEZONE": tz, "RETURN_AS_TIMEZONE_AWARE": True},
+            )
+            bot_handler.send_reply(message, "<time: {}>\n\n`<time: {}>`".format(t, t))
 
         # proof of concept forwarding to other (local) zulip bots
         # TBD?: forward via chat to other external bots
@@ -29,13 +42,12 @@ def dispatch(command, message, bot_handler):
 
 if __name__ == "__main__":
     client = zulip.Client(config_file="zuliprc")
-    bot_handler = ExternalBotHandler(client, None, None)
 
     def handle_message(message):
         if message["content"].startswith("?"):
             words = message["content"].split(" ")
             command: str = message["content"].split(" ")[0]
-            dispatch(command.lstrip("?"), message, bot_handler)
+            dispatch(command.lstrip("?"), message, client)
         else:
             print("not a command")
             print(message)
