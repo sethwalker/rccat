@@ -13,7 +13,9 @@ def dispatch(command, message, client):
             return
 
         case "list":
-            bot_handler.send_reply(message, "help, list, convert, time, ritersay")
+            bot_handler.send_reply(
+                message, "help, list, convert, time, ritersay, scrollart"
+            )
 
         case "time":
             import dateparser
@@ -44,6 +46,12 @@ def dispatch(command, message, client):
 
             handler = converter.handler_class()
             handler.handle_message(message, bot_handler)
+
+        case "scrollart":
+            from handlers.scrollart import orbitaltravels
+
+            reply = orbitaltravels.handle_message(message, bot_handler)
+            bot_handler.send_reply(message, reply)
 
         case _:
             # TODO: if direct message or mention, otherwise ignore
