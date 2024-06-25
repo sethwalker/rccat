@@ -27,6 +27,11 @@ def dispatch(command, message, client):
             )
             bot_handler.send_reply(message, "<time: {}>\n\n`<time: {}>`".format(t, t))
 
+        case "selffive":
+            client.add_reaction(
+                {"message_id": message["id"], "emoji_name": "highfive-pika"}
+            )
+
         # proof of concept forwarding to other (local) zulip bots
         # TBD?: forward via chat to other external bots
         case "convert":
