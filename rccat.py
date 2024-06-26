@@ -14,19 +14,25 @@ if __name__ == "__main__":
                 return "seth.h.walker@gmail.com" == user["email"]
 
             def update():
-                output = subprocess.check_output(["git", "pull"], text=True)
+                git_output = subprocess.check_output(["git", "pull"], text=True)
+                pip_output = subprocess.check_output(
+                    ["pip", "install", "-r", "requirements.txt"], text=True
+                )
+                message_content = "`git pull`\n```sh\n{}```\n`pip install -r requirements.txt`\n```sh\n{}```".format(
+                    git_output, pip_output
+                )
                 reply = {
                     "type": "stream",
                     "to": "test-bot",
                     "topic": "rccat",
-                    "content": "`git pull`\n```sh\n{}```".format(output),
+                    "content": message_content,
                 }
                 client.send_message(reply)
-                print(output)
+                print(message_content)
 
                 importlib.reload(dispatcher)
 
-                return output
+                return message_content
 
             u = client.get_user_by_id(message["sender_id"])
             if can_update(u["user"]):
