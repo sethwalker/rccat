@@ -1,7 +1,8 @@
 import zulip
-from dispatcher import dispatch
 from multiprocessing import Process
 import subprocess
+import importlib
+import dispatcher
 
 if __name__ == "__main__":
     client = zulip.Client(config_file="zuliprc")
@@ -22,16 +23,23 @@ if __name__ == "__main__":
                 }
                 client.send_message(reply)
                 print(output)
+
+                importlib.reload(dispatcher)
+
                 return output
 
             u = client.get_user_by_id(message["sender_id"])
             if can_update(u["user"]):
                 update()
+
             return
 
         if message["content"].startswith("?"):
             words = message["content"].split(" ")
             command: str = message["content"].split(" ")[0]
+
+            from dispatcher import dispatch
+
             p = Process(target=dispatch, args=(command.lstrip("?"), message, client))
             p.start()
             p.join()
