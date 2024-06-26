@@ -8,7 +8,7 @@ def dispatch(command, message, client):
 
     match command:
         case "help":
-            bot_handler.send_reply(message, "you have been helped")
+            bot_handler.send_reply(message, "you have now been helped")
             return
 
         case "list":
