@@ -1,76 +1,40 @@
 import zulip
-from zulip_bots.lib import ExternalBotHandler
-
-
-def dispatch(command, message, client):
-    bot_handler = ExternalBotHandler(client, None, None)
-    # strip the command from the message
-    message["content"] = message["content"][len(command) + 1 :]
-
-    match command:
-        case "help":
-            bot_handler.send_reply(message, "you have been helped")
-            return
-
-        case "list":
-            bot_handler.send_reply(
-                message, "help, list, convert, time, ritersay, scrollart"
-            )
-
-        case "time":
-            import dateparser
-
-            u = client.get_user_by_id(message["sender_id"])
-            tz = u["user"]["timezone"]
-            print(tz)
-            t = dateparser.parse(
-                message["content"],
-                settings={"TIMEZONE": tz, "RETURN_AS_TIMEZONE_AWARE": True},
-            )
-            bot_handler.send_reply(message, "<time: {}>\n\n`<time: {}>`".format(t, t))
-
-        case "selffive":
-            client.add_reaction(
-                {"message_id": message["id"], "emoji_name": "highfive-pika"}
-            )
-
-        case "ritersay":
-            from handlers import riter
-
-            riter.say(message["content"])
-
-        case "riterscroll":
-            from handlers import riter
-
-            riter.scroll(message["content"])
-
-        # proof of concept forwarding to other (local) zulip bots
-        # TBD?: forward via chat to other external bots
-        case "convert":
-            from handlers.bots.converter import converter
-
-            handler = converter.handler_class()
-            handler.handle_message(message, bot_handler)
-
-        case "scrollart":
-            from handlers.scrollart import orbitaltravels
-
-            reply = orbitaltravels.handle_message(message, bot_handler)
-            bot_handler.send_reply(message, reply)
-
-        case _:
-            # TODO: if direct message or mention, otherwise ignore
-            bot_handler.send_reply(message, "unknown command, try ?list")
-
+from dispatcher import dispatch
+from multiprocessing import Process
+import subprocess
 
 if __name__ == "__main__":
     client = zulip.Client(config_file="zuliprc")
 
     def handle_message(message):
+        if "!update" == message["content"]:
+
+            def can_update(user):
+                return "seth.h.walker@gmail.com" == user["email"]
+
+            def update():
+                output = subprocess.check_output(["git", "pull"], text=True)
+                reply = {
+                    "type": "stream",
+                    "to": "test-bot",
+                    "topic": "rccat",
+                    "content": "`git pull`\n```sh\n{}```".format(output),
+                }
+                client.send_message(reply)
+                print(output)
+                return output
+
+            u = client.get_user_by_id(message["sender_id"])
+            if can_update(u["user"]):
+                update()
+            return
+
         if message["content"].startswith("?"):
             words = message["content"].split(" ")
             command: str = message["content"].split(" ")[0]
-            dispatch(command.lstrip("?"), message, client)
+            p = Process(target=dispatch, args=(command.lstrip("?"), message, client))
+            p.start()
+            p.join()
         else:
             print("not a command")
             print(message)
