@@ -17,6 +17,7 @@ def dispatch(command, message, client):
                 message,
                 "help, list, convert, time, ritersay, riterscroll, scrollart, selffive",
             )
+            return
 
         case "time":
             import dateparser
@@ -28,21 +29,25 @@ def dispatch(command, message, client):
                 settings={"TIMEZONE": tz, "RETURN_AS_TIMEZONE_AWARE": True},
             )
             bot_handler.send_reply(message, "<time: {}>\n\n`<time: {}>`".format(t, t))
+            return
 
         case "selffive":
             client.add_reaction(
                 {"message_id": message["id"], "emoji_name": "highfive-pika"}
             )
+            return
 
         case "ritersay":
             from handlers import riter
 
             riter.say(message["content"])
+            return
 
         case "riterscroll":
             from handlers import riter
 
             riter.scroll(message["content"])
+            return
 
         # proof of concept forwarding to other (local) zulip bots
         # TBD?: forward via chat to other external bots
@@ -51,12 +56,14 @@ def dispatch(command, message, client):
 
             handler = converter.handler_class()
             handler.handle_message(message, bot_handler)
+            return
 
         case "scrollart":
             from handlers.scrollart import orbitaltravels
 
             reply = orbitaltravels.handle_message(message, bot_handler)
             bot_handler.send_reply(message, reply)
+            return
 
         case _:
             try:
