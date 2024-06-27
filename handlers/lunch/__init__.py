@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def handle_message(message, bot_handler):
-    DB_PATH = Path(__file__) / Path("../locations.db")
+    DB_PATH = (Path(__file__) / Path("../locations.db")).resolve()
     print("connecting to lunch locations db", DB_PATH)
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()

@@ -34,7 +34,7 @@ def say(text):
 
 
 def greg_say(text):
-    FONT_PATH = Path(__file__) / Path("../font-undead-pixel-8.ttf")
+    FONT_PATH = (Path(__file__) / Path("../font-undead-pixel-8.ttf")).resolve()
     TMP_OUT_PATH = Path("/tmp/out.png")
 
     subprocess.run(
