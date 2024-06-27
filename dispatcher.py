@@ -1,4 +1,5 @@
 from zulip_bots.lib import ExternalBotHandler
+import importlib
 
 
 def dispatch(command, message, client):
@@ -58,5 +59,12 @@ def dispatch(command, message, client):
             bot_handler.send_reply(message, reply)
 
         case _:
-            # TODO: if direct message or mention, otherwise ignore
-            bot_handler.send_reply(message, "unknown command, try ?list")
+            try:
+                handler = importlib.import_module("handlers.{}".format(command))
+                reply = handler.handle_message(message, bot_handler)
+                if reply:
+                    bot_handler.send_reply(message, reply)
+            except Exception as e:
+                print(e)
+                # TODO: if direct message or mention, otherwise ignore
+                bot_handler.send_reply(message, "unknown command, try ?list")
