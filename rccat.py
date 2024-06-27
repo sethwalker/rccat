@@ -21,9 +21,18 @@ def handle_message(message, client):
             update(client)
         return
 
-    if message["content"].startswith("?"):
-        words = message["content"].split(" ")
-        command: str = message["content"].split(" ")[0]
+    if (
+        message["content"].startswith("?")
+        or message["content"].startswith("@**rccat** ?")
+        or message["content"].startswith("@**rccat-dev** ?")
+    ):
+        words = (
+            message["content"]
+            .lstrip("@**rccat** ")
+            .lstrip("@**rccat-dev** ")
+            .split(" ")
+        )
+        command: str = words[0]
 
         from dispatcher import dispatch
 
