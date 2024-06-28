@@ -37,8 +37,9 @@ def dispatch(command, message, client):
                 message["content"],
                 settings={"TIMEZONE": tz, "RETURN_AS_TIMEZONE_AWARE": True},
             )
-            bot_handler.send_reply(message, "<time: {}>\n\n`<time: {}>`".format(t, t))
-            return
+            bot_handler.send_reply(
+                message, "<time: {}>\n\n```\n<time: {}>\n```".format(t, t)
+            )
 
         case "selffive":
             client.add_reaction(
