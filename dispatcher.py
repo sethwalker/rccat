@@ -5,14 +5,23 @@ import importlib
 def dispatch(command, message, client):
     bot_handler = ExternalBotHandler(client, None, None)
     # strip the command from the message
-    message["content"] = message["content"][len(command) + 1 :]
+    message["content"] = message["content"][len(command) + 2 :]
+
+    SEND_HELP = True if "help" == command else False
+    if SEND_HELP:
+        command = message["content"].split(" ")[0]
+        if not command:
+            return bot_handler.send_reply(
+                message,
+                "hi, i'm @**rccat**. i can do a few things (try ?list). [add more](https://github.com/sethwalker/rccat)",
+            )
 
     match command:
-        case "help":
-            bot_handler.send_reply(message, "you have now been helped")
-            return
-
         case "list":
+            if SEND_HELP:
+                return bot_handler.send_reply(
+                    message, "`list`: returns a list of available commands, probably"
+                )
             bot_handler.send_reply(
                 message,
                 "help, list, convert, time, ritersay, riterscroll, scrollart, selffive",
@@ -55,8 +64,10 @@ def dispatch(command, message, client):
             from handlers.bots.converter import converter
 
             handler = converter.handler_class()
-            handler.handle_message(message, bot_handler)
-            return
+            if SEND_HELP:
+                bot_handler.send_reply(message, handler.usage())
+            else:
+                handler.handle_message(message, bot_handler)
 
         case "scrollart":
             from handlers.scrollart import orbitaltravels
@@ -68,7 +79,10 @@ def dispatch(command, message, client):
         case _:
             try:
                 handler = importlib.import_module("handlers.{}".format(command))
-                reply = handler.handle_message(message, bot_handler)
+                if SEND_HELP:
+                    reply = handler.usage()
+                else:
+                    reply = handler.handle_message(message, bot_handler)
                 if reply:
                     bot_handler.send_reply(message, reply)
             except Exception as e:

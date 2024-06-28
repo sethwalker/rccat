@@ -1,5 +1,9 @@
+def usage():
+    return "you have been zoomed"
+
+
 def handle_message(message, bot_handler):
-    room = message["content"].split(" ")[1]
+    room = message["content"].split(" ")[0]
 
     # TODO
     # if no room, join the meeting on your calendar
